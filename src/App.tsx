@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { IBtn, btns } from './btns';
 const App = () => {
   const [inputValue, setInputValue] = useState('0');
@@ -7,22 +7,24 @@ const App = () => {
   const [num2, setNum2] = useState('');
   const [clicked, setClicked] = useState(false);
   const [touchstartX, setTouchstartX] = useState(0);
-  const [touchendX, setTouchendX] = useState(0);
-  const getResult = (num1: string, num2: string) => {
-    const number1 = Number(num1.replace(/,/gi, '.'));
-    const number2 = Number(num2.replace(/,/gi, '.'));
-    return String(
-      sign === '+'
-        ? number1 + number2
-        : sign === '-'
-        ? number1 - number2
-        : sign === '×'
-        ? number1 * number2
-        : sign === '÷'
-        ? number1 / number2
-        : number1
-    );
-  };
+  const getResult = useCallback(
+    (num1: string, num2: string) => {
+      const number1 = Number(num1.replace(/,/gi, '.'));
+      const number2 = Number(num2.replace(/,/gi, '.'));
+      return String(
+        sign === '+'
+          ? number1 + number2
+          : sign === '-'
+          ? number1 - number2
+          : sign === '×'
+          ? number1 * number2
+          : sign === '÷'
+          ? number1 / number2
+          : number1
+      );
+    },
+    [sign]
+  );
 
   const handleClick = (value: string, type: string) => {
     if (type === 'number') {
@@ -107,12 +109,11 @@ const App = () => {
       setInputValue(String(result));
     }
     if (inputValue.length <= 0 || inputValue === '-') setInputValue('0');
-  }, [num2, deleteSlide]);
+  }, [num2, getResult, inputValue, num1]);
   return (
     <main
       onTouchStart={(e) => setTouchstartX(e.changedTouches[0].screenX)}
       onTouchEnd={(e) => {
-        setTouchendX(e.changedTouches[0].screenX);
         deleteSlide(e.changedTouches[0].screenX);
       }}
       style={{ borderRadius: 23 }}
